@@ -21,7 +21,69 @@ let comprehensiveDatabase = [
   { id: 8, name: "Mamak Tadilat Dekorasyon", category: "insaat", district: "Mamak", rating: 3.1, reviews: 8, website: null, phone: "905328887766" }
 ];
 
-// Lead Listeleme ve Dinamik Demo Linki Üretici
+// 1. ANA SAYFA: Müşterilerin göreceği profesyonel Tan Medya Tasarım kurumsal yüzü
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tan Medya Tasarım | Ankara Web Tasarım & Dijital Çözümler</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
+        <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="font-extrabold text-xl tracking-tight text-white flex items-center space-x-2">
+                    <span class="bg-indigo-600 text-white p-2 rounded-xl">TM</span>
+                    <span>Tan Medya Tasarım</span>
+                </div>
+                <nav class="hidden md:flex space-x-6 text-sm text-slate-300">
+                    <a href="#hizmetler" class="hover:text-white transition">Hizmetler</a>
+                    <a href="#iletisim" class="hover:text-white transition">İletişim</a>
+                </nav>
+            </div>
+        </header>
+        <main class="max-w-6xl mx-auto px-6 py-20 text-center">
+            <span class="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-bold uppercase tracking-wider">Ankara Dijital Çözüm Ortağınız</span>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white mt-6 tracking-tight">İşletmenizi Dijitalde<br><span class="text-indigo-500">Zirveye Taşıyın</span></h1>
+            <p class="text-lg text-slate-400 mt-6 max-w-2xl mx-auto">Web tasarımı, e-ticaret altyapıları, Google Maps SEO ve özel dijital sistemlerle markanıza değer katıyoruz.</p>
+            <div class="mt-10 flex justify-center space-x-4">
+                <a href="#iletisim" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-2xl shadow-xl transition">Hemen Teklif Al</a>
+            </div>
+        </main>
+        <section id="hizmetler" class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 w-full">
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl">
+                <div class="text-3xl mb-4">💻</div>
+                <h3 class="text-lg font-bold text-white">Özel Web Tasarım</h3>
+                <p class="text-sm text-slate-400 mt-2">Mobil uyumlu, hızlı ve modern kurumsal web siteleri.</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl">
+                <div class="text-3xl mb-4">📍</div>
+                <h3 class="text-lg font-bold text-white">Google Maps SEO</h3>
+                <p class="text-sm text-slate-400 mt-2">Bölgesel aramalarda ilk sırada yerinizi alın, müşteri kazanın.</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl">
+                <div class="text-3xl mb-4">⚡</div>
+                <h3 class="text-lg font-bold text-white">Hızlı QR Menü & Sistemler</h3>
+                <p class="text-sm text-slate-400 mt-2">Kafe ve işletmeler için anlık dijital sipariş altyapıları.</p>
+            </div>
+        </section>
+        <footer id="iletisim" class="border-t border-slate-800 bg-slate-900 py-12 text-center text-xs text-slate-500">
+            <p>© 2026 Tan Medya Tasarım. Tüm hakları saklıdır. Ankara / Türkiye</p>
+        </footer>
+    </body>
+    </html>
+  `);
+});
+
+// 2. GİZLİ YÖNETİM PANELİ: Sadece senin bileceğin gizli adres (`/yonetim-gizli-panel`)
+app.get('/yonetim-gizli-panel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 3. LEAD VERİ API'Sİ
 app.get('/api/leads', (req, res) => {
   const { district, category, filter } = req.query;
   let results = comprehensiveDatabase;
@@ -35,8 +97,6 @@ app.get('/api/leads', (req, res) => {
     if (lead.rating < 3.8) problems.push(`Puanınız ${lead.rating} seviyesinde.`);
 
     const isHotLead = !lead.website || lead.rating < 3.8;
-    
-    // Vercel'de kusursuz çalışan dinamik rota linki
     const demoLink = `https://tanmedyatasarim.vercel.app/demo/${lead.id}`;
 
     let pitch = `Merhaba ${lead.name} yetkilisi, Ankara ${lead.district} bölgesindeki işletmenizi Google'da inceledim. ${problems.join(" ")} Sizin için hazırladığımız örnek demo siteyi inceleyebilirsiniz: ${demoLink} - Beğenirseniz 24 saat içinde bu altyapıyı size özel kuralım. Tan Medya Tasarım.`;
@@ -50,14 +110,13 @@ app.get('/api/leads', (req, res) => {
   res.json({ total: comprehensiveDatabase.length, filteredCount: finalLeads.length, leads: finalLeads });
 });
 
-// Dinamik Sektörel Demo Sayfası (Dosya yazmaya gerek kalmadan anlık render olur)
+// 4. MÜŞTERİNİN GÖRECEĞİ SEKTÖREL ÖRNEK DEMO SİTE
 app.get('/demo/:id', (req, res) => {
   const leadId = parseInt(req.params.id);
   const lead = comprehensiveDatabase.find(l => l.id === leadId);
 
   const firmaAdi = lead ? lead.name : "Özel İşletme";
   const district = lead ? lead.district : "Ankara";
-  const category = lead ? lead.category : "kurumsal";
 
   res.send(`
     <!DOCTYPE html>
@@ -105,10 +164,10 @@ app.get('/demo/:id', (req, res) => {
   `);
 });
 
-// Yerel test için
+// Yerel test
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
-    console.log(`🚀 Tan Medya Tasarım Motoru aktif: http://localhost:${PORT}`);
+    console.log(`🚀 Sistem aktif: http://localhost:${PORT}`);
   });
 }
 
