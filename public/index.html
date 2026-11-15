@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ankara Esnaf Avcısı - Kapsamlı Tarama Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl font-bold text-xl text-white shadow-lg shadow-indigo-500/20">🎯</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Tan Medya Tasarım | Esnaf Avcısı</h1>
+                    <p class="text-xs text-slate-400">Ankara Geneli Kapsamlı Harita ve Demo Motoru</p>
+                </div>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span> Tüm Ankara Taranıyor
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">Veritabanındaki Toplam İşletme</p>
+                <p id="totalCount" class="text-3xl font-extrabold text-white mt-2">0</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">🔥 Filtrelenen Sıcak Fırsat</p>
+                <p id="hotCount" class="text-3xl font-extrabold text-indigo-400 mt-2">0</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">Dönüşüm Potansiyeli</p>
+                <p id="conversionRate" class="text-3xl font-extrabold text-emerald-400 mt-2">%0</p>
+            </div>
+        </div>
+
+        <!-- Filters & Controls Bar -->
+        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl mb-8 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3 items-center">
+                <!-- Bölge Seçimi -->
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Bölçe / İlçe</label>
+                    <select id="districtFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
+                        <option value="all">Tüm Ankara</option>
+                        <option value="Ostim">Ostim OSB</option>
+                        <option value="İvedik OSB">İvedik OSB</option>
+                        <option value="Siteler">Siteler</option>
+                        <option value="Çankaya">Çankaya</option>
+                        <option value="Altındağ">Altındağ</option>
+                        <option value="Mamak">Mamak</option>
+                        <option value="Keçiören">Keçiören</option>
+                        <option value="Sincan">Sincan</option>
+                        <option value="Yenimahalle">Yenimahalle</option>
+                    </select>
+                </div>
+
+                <!-- Sektör Seçimi -->
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Sektör</label>
+                    <select id="categoryFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
+                        <option value="all">Tüm Sektörler</option>
+                        <option value="oto">Oto Servis & Tamir</option>
+                        <option value="mobilya">Mobilya & Ahşap</option>
+                        <option value="metal">Metal & Torna</option>
+                        <option value="kafe">Kafe & Restoran</option>
+                        <option value="nakliye">Nakliyat & Lojistik</option>
+                        <option value="insaat">İnşaat & Tadilat</option>
+                        <option value="hizmet">Diğer Hizmetler</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Fırsat Filtresi -->
+            <div class="flex space-x-2">
+                <button onclick="setFilterMode('all')" id="btnAll" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow transition">Tümünü Göster</button>
+                <button onclick="setFilterMode('hot')" id="btnHot" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🔥 Sadece Fırsatlar</button>
+            </div>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase text-slate-400 font-semibold tracking-wider">
+                            <th class="p-4">İşletme Adı</th>
+                            <th class="p-4">Bölge & Sektör</th>
+                            <th class="p-4">Google Puanı</th>
+                            <th class="p-4">Web Durumu</th>
+                            <th class="p-4">Demo Linki & AI Satış Metni</th>
+                            <th class="p-4 text-right">Aksiyon</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="divide-y divide-slate-800 text-sm">
+                        <!-- Dynamic JS Injection -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 font-medium text-sm flex items-center space-x-2">
+        <span>✅</span> <span id="toastText">Kopyalandı!</span>
+    </div>
+
+    <script>
+        let currentFilterMode = 'all';
+
+        async function fetchLeads() {
+            const district = document.getElementById('districtFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+
+            try {
+                const res = await fetch(`/api/leads?district=${district}&category=${category}&filter=${currentFilterMode}`);
+                const data = await res.json();
+                renderLeads(data);
+            } catch (err) {
+                console.error("Veri alınamadı:", err);
+            }
+        }
+
+        function setFilterMode(mode) {
+            currentFilterMode = mode;
+            document.getElementById('btnAll').className = mode === 'all' ? 'px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow' : 'px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+            document.getElementById('btnHot').className = mode === 'hot' ? 'px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow' : 'px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+            fetchLeads();
+        }
+
+        function renderLeads(data) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+
+            document.getElementById('totalCount').innerText = data.total;
+            document.getElementById('hotCount').innerText = data.filteredCount;
+            document.getElementById('conversionRate').innerText = '%' + Math.round((data.filteredCount / (data.total || 1)) * 100);
+
+            if (data.leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">Seçilen kriterlere uygun işletme bulunamadı.</td></tr>`;
+                return;
+            }
+
+            data.leads.forEach(lead => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition";
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-white flex items-center space-x-2">
+                        <span>${lead.name}</span>
+                        ${lead.isHotLead ? '<span class="px-2 py-0.5 text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full font-bold">FIRSAT</span>' : ''}
+                    </td>
+                    <td class="p-4 text-slate-300">
+                        <span class="text-indigo-400 font-medium">${lead.district}</span><br>
+                        <span class="text-xs text-slate-500 uppercase">${lead.category}</span>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-amber-400 font-bold">⭐ ${lead.rating}</span>
+                            <span class="text-xs text-slate-500">(${lead.reviews})</span>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        ${lead.website ? `<a href="${lead.website}" target="_blank" class="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md hover:underline">Web Var</a>` : `<span class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-md">Web Yok ❌</span>`}
+                    </td>
+                    <td class="p-4 max-w-md">
+                        <div class="mb-2">
+                            <a href="${lead.demoLink}" target="_blank" class="text-xs text-indigo-400 underline font-semibold hover:text-indigo-300">🔗 Demo Siteyi Gör (${lead.name})</a>
+                        </div>
+                        <p class="text-xs text-slate-300 bg-slate-950/40 p-3 rounded-lg border border-slate-800/80 leading-relaxed">${lead.pitch}</p>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="copyPitch(\`${lead.pitch.replace(/"/g, '&quot;')}\`)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition border border-slate-700">Kopyala</button>
+                        <a href="https://wa.me/${lead.phone}?text=${encodeURIComponent(lead.pitch)}" target="_blank" class="inline-block px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition shadow-lg shadow-emerald-600/20">WhatsApp</a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function copyPitch(text) {
+            navigator.clipboard.writeText(text);
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = "Satış mesajı panoya kopyalandı!";
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        // İlk açılışta verileri çek
+        fetchLeads();
+    </script>
+</body>
+</html>
