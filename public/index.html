@@ -3,158 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tan Medya Tasarım | Güvenli Yönetim Paneli</title>
+    <title>Tan Medya Tasarım | 81 İl Derin Esnaf Avcısı</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
-
-    <!-- ŞİFRE KİLİDİ MODALI (Giriş Yapılmadan Panel Görünmez) -->
-    <div id="authModal" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center px-4">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md w-full shadow-2xl text-center">
-            <div class="bg-indigo-600 w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-xl font-bold mb-4 shadow-lg shadow-indigo-500/20">🔒</div>
-            <h2 class="text-xl font-bold text-white mb-2">Yetkili Girişi</h2>
-            <p class="text-xs text-slate-400 mb-6">Bu alana sadece Tan Medya Tasarım yöneticisi erişebilir.</p>
-            
-            <form onsubmit="checkPassword(event)" class="space-y-4">
-                <input type="password" id="adminPassword" placeholder="Yönetici Şifrenizi Girin" required 
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-100 px-4 py-3 rounded-xl text-sm outline-none focus:border-indigo-500 text-center tracking-widest">
-                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-600/20">Sisteme Giriş Yap</button>
-            </form>
-            <p id="errorMsg" class="text-xs text-rose-400 mt-3 hidden">Hatalı şifre! Tekrar deneyin.</p>
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl font-bold text-xl text-white shadow-lg shadow-indigo-500/20">🎯</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Tan Medya Tasarım | 81 İl Avcısı</h1>
+                    <p class="text-xs text-slate-400">Derin Tarama ve Otomatik AI Satış Motoru</p>
+                </div>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span> Sistem Aktif
+            </span>
         </div>
-    </div>
+    </header>
 
-    <!-- ASIL YÖNETİM PANELİ (Şifre Girilmeden Gizlidir) -->
-    <div id="mainApp" class="hidden">
-        <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-indigo-600 p-2.5 rounded-xl font-bold text-xl text-white shadow-lg shadow-indigo-500/20">🎯</div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight text-white">Tan Medya Tasarım | Güvenli Avcı</h1>
-                        <p class="text-xs text-slate-400">81 İl Derin Tarama ve Otomatik AI Satış Motoru</p>
-                    </div>
-                </div>
-                <button onclick="logout()" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-semibold hover:bg-rose-500/20 transition">Çıkış Yap</button>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">Taranan Toplam İşletme</p>
+                <p id="totalCount" class="text-3xl font-extrabold text-white mt-2">0</p>
             </div>
-        </header>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">🔥 Sıcak Fırsatlar (Web Yok / Puan Düşük)</p>
+                <p id="hotCount" class="text-3xl font-extrabold text-indigo-400 mt-2">0</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <p class="text-sm font-medium text-slate-400">Dönüşüm Oranı</p>
+                <p id="conversionRate" class="text-3xl font-extrabold text-emerald-400 mt-2">%0</p>
+            </div>
+        </div>
 
-        <main class="max-w-7xl mx-auto px-6 py-8">
-            <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                    <p class="text-sm font-medium text-slate-400">Taranan Toplam İşletme</p>
-                    <p id="totalCount" class="text-3xl font-extrabold text-white mt-2">0</p>
+        <!-- Filters -->
+        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl mb-8 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3 items-center">
+                <!-- 81 İl Seçimi -->
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">İl Seçimi (81 İl)</label>
+                    <select id="ilFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
+                        <option value="Ankara">Ankara</option>
+                        <option value="İstanbul">İstanbul</option>
+                        <option value="İzmir">İzmir</option>
+                        <option value="Adana">Adana</option>
+                        <option value="Adıyaman">Adıyaman</option>
+                        <option value="Afyonkarahisar">Afyonkarahisar</option>
+                        <option value="Ağrı">Ağrı</option>
+                        <option value="Amasya">Amasya</option>
+                        <option value="Antalya">Antalya</option>
+                        <option value="Artvin">Artvin</option>
+                        <option value="Aydın">Aydın</option>
+                        <option value="Balıkesir">Balıkesir</option>
+                        <option value="Bilecik">Bilecik</option>
+                        <option value="Bingöl">Bingöl</option>
+                        <option value="Bitlis">Bitlis</option>
+                        <option value="Bolu">Bolu</option>
+                        <option value="Burdur">Burdur</option>
+                        <option value="Bursa">Bursa</option>
+                        <option value="Çanakkale">Çanakkale</option>
+                        <option value="Çankırı">Çankırı</option>
+                        <option value="Çorum">Çorum</option>
+                        <option value="Denizli">Denizli</option>
+                        <option value="Diyarbakır">Diyarbakır</option>
+                        <option value="Edirne">Edirne</option>
+                        <option value="Elazığ">Elazığ</option>
+                        <option value="Erzincan">Erzincan</option>
+                        <option value="Erzurum">Erzurum</option>
+                        <option value="Eskişehir">Eskişehir</option>
+                        <option value="Gaziantep">Gaziantep</option>
+                        <option value="Giresun">Giresun</option>
+                        <option value="Gümüşhane">Gümüşhane</option>
+                        <option value="Hakkâri">Hakkâri</option>
+                        <option value="Hatay">Hatay</option>
+                        <option value="Isparta">Isparta</option>
+                        <option value="Mersin">Mersin</option>
+                        <option value="Kars">Kars</option>
+                        <option value="Kastamonu">Kastamonu</option>
+                        <option value="Kayseri">Kayseri</option>
+                        <option value="Kırklareli">Kırklareli</option>
+                        <option value="Kırşehir">Kırşehir</option>
+                        <option value="Kocaeli">Kocaeli</option>
+                        <option value="Konya">Konya</option>
+                        <option value="Kütahya">Kütahya</option>
+                        <option value="Malatya">Malatya</option>
+                        <option value="Manisa">Manisa</option>
+                        <option value="Kahramanmaraş">Kahramanmaraş</option>
+                        <option value="Mardin">Mardin</option>
+                        <option value="Muğla">Muğla</option>
+                        <option value="Muş">Muş</option>
+                        <option value="Nevşehir">Nevşehir</option>
+                        <option value="Niğde">Niğde</option>
+                        <option value="Ordu">Ordu</option>
+                        <option value="Rize">Rize</option>
+                        <option value="Sakarya">Sakarya</option>
+                        <option value="Samsun">Samsun</option>
+                        <option value="Siirt">Siirt</option>
+                        <option value="Sinop">Sinop</option>
+                        <option value="Sivas">Sivas</option>
+                        <option value="Tekirdağ">Tekirdağ</option>
+                        <option value="Tokat">Tokat</option>
+                        <option value="Trabzon">Trabzon</option>
+                        <option value="Tunceli">Tunceli</option>
+                        <option value="Şanlıurfa">Şanlıurfa</option>
+                        <option value="Uşak">Uşak</option>
+                        <option value="Van">Van</option>
+                        <option value="Yozgat">Yozgat</option>
+                        <option value="Zonguldak">Zonguldak</option>
+                        <option value="Aksaray">Aksaray</option>
+                        <option value="Bayburt">Bayburt</option>
+                        <option value="Karaman">Karaman</option>
+                        <option value="Kırıkkale">Kırıkkale</option>
+                        <option value="Batman">Batman</option>
+                        <option value="Şırnak">Şırnak</option>
+                        <option value="Bartın">Bartın</option>
+                        <option value="Ardahan">Ardahan</option>
+                        <option value="Iğdır">Iğdır</option>
+                        <option value="Yalova">Yalova</option>
+                        <option value="Karabük">Karabük</option>
+                        <option value="Kilis">Kilis</option>
+                        <option value="Osmaniye">Osmaniye</option>
+                        <option value="Düzce">Düzce</option>
+                    </select>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                    <p class="text-sm font-medium text-slate-400">🔥 Sıcak Fırsatlar (Web Yok / Puan Düşük)</p>
-                    <p id="hotCount" class="text-3xl font-extrabold text-indigo-400 mt-2">0</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                    <p class="text-sm font-medium text-slate-400">Dönüşüm Oranı</p>
-                    <p id="conversionRate" class="text-3xl font-extrabold text-emerald-400 mt-2">%0</p>
+
+                <!-- Sektör Seçimi -->
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Sektör</label>
+                    <select id="categoryFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
+                        <option value="oto">Oto Servis & Tamir</option>
+                        <option value="mobilya">Mobilya & Ahşap</option>
+                        <option value="metal">Metal & Torna</option>
+                        <option value="kafe">Kafe & Restoran</option>
+                        <option value="nakliye">Nakliyat & Lojistik</option>
+                        <option value="insaat">İnşaat & Tadilat</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl mb-8 flex flex-wrap gap-4 items-center justify-between">
-                <div class="flex flex-wrap gap-3 items-center">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">İl Seçimi (81 İl)</label>
-                        <select id="ilFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
-                            <option value="Ankara">Ankara</option>
-                            <option value="İstanbul">İstanbul</option>
-                            <option value="İzmir">İzmir</option>
-                            <option value="Bursa">Bursa</option>
-                            <option value="Antalya">Antalya</option>
-                            <option value="Konya">Konya</option>
-                            <option value="Adana">Adana</option>
-                            <option value="Gaziantep">Gaziantep</option>
-                            <option value="Trabzon">Trabzon</option>
-                            <option value="Samsun">Samsun</option>
-                            <option value="Eskişehir">Eskişehir</option>
-                            <option value="Kayseri">Kayseri</option>
-                            <option value="Mersin">Mersin</option>
-                            <option value="Diyarbakır">Diyarbakır</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Sektör</label>
-                        <select id="categoryFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-indigo-500">
-                            <option value="oto">Oto Servis & Tamir</option>
-                            <option value="mobilya">Mobilya & Ahşap</option>
-                            <option value="metal">Metal & Torna</option>
-                            <option value="kafe">Kafe & Restoran</option>
-                            <option value="nakliye">Nakliyat & Lojistik</option>
-                            <option value="insaat">İnşaat & Tadilat</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex space-x-2">
-                    <button onclick="setFilterMode('all')" id="btnAll" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow transition">Tümü</button>
-                    <button onclick="setFilterMode('hot')" id="btnHot" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🔥 Sadece Fırsatlar</button>
-                </div>
+            <div class="flex space-x-2">
+                <button onclick="setFilterMode('all')" id="btnAll" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow transition">Tümü</button>
+                <button onclick="setFilterMode('hot')" id="btnHot" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🔥 Sadece Fırsatlar</button>
             </div>
+        </div>
 
-            <!-- Table -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase text-slate-400 font-semibold tracking-wider">
-                                <th class="p-4">İşletme Adı</th>
-                                <th class="p-4">Konum & Sektör</th>
-                                <th class="p-4">Google Puanı</th>
-                                <th class="p-4">Web Durumu</th>
-                                <th class="p-4">Demo Linki & Satış Mesajı</th>
-                                <th class="p-4 text-right">Aksiyon</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leadsTableBody" class="divide-y divide-slate-800 text-sm"></tbody>
-                    </table>
-                </div>
+        <!-- Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase text-slate-400 font-semibold tracking-wider">
+                            <th class="p-4">İşletme Adı</th>
+                            <th class="p-4">Konum & Sektör</th>
+                            <th class="p-4">Google Puanı</th>
+                            <th class="p-4">Web Durumu</th>
+                            <th class="p-4">Özel Demo Linki & Satış Mesajı</th>
+                            <th class="p-4 text-right">Aksiyon</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="divide-y divide-slate-800 text-sm"></tbody>
+                </table>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <div id="toast" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 font-medium text-sm flex items-center space-x-2">
         <span>✅</span> <span id="toastText">Kopyalandı!</span>
     </div>
 
     <script>
-        // ŞİFRE KONTROL MİMARİSİ
-        const ADMIN_PASSWORD = "tanmedya06"; // Buradan şifreni istediğin gibi değiştirebilirsin
-
-        window.onload = function() {
-            if (sessionStorage.getItem("tanMedyaAuth") === "true") {
-                unlockApp();
-            }
-        }
-
-        function checkPassword(e) {
-            e.preventDefault();
-            const pass = document.getElementById('adminPassword').value;
-            if (pass === ADMIN_PASSWORD) {
-                sessionStorage.setItem("tanMedyaAuth", "true");
-                unlockApp();
-            } else {
-                document.getElementById('errorMsg').classList.remove('hidden');
-            }
-        }
-
-        function unlockApp() {
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            fetchLeads();
-        }
-
-        function logout() {
-            sessionStorage.removeItem("tanMedyaAuth");
-            location.reload();
-        }
-
         let currentFilterMode = 'all';
 
         async function fetchLeads() {
@@ -195,4 +215,37 @@
                 tr.className = "hover:bg-slate-800/50 transition";
                 tr.innerHTML = `
                     <td class="p-4 font-semibold text-white flex items-center space-x-2">
-                        <span>${lead.name}</span>${lead.isHotLead ? '<span class="px-2 py-0.5 text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full font-bold">FIRS
+                        <span>${lead.name}</span>
+                        ${lead.isHotLead ? '<span class="px-2 py-0.5 text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full font-bold">FIRSAT</span>' : ''}
+                    </td>
+                    <td class="p-4 text-slate-300">
+                        <span class="text-indigo-400 font-medium">${lead.district}</span><br>
+                        <span class="text-xs text-slate-500 uppercase">${lead.category}</span>
+                    </td>
+                    <td class="p-4"><span class="text-amber-400 font-bold">⭐ ${lead.rating}</span> <span class="text-xs text-slate-500">(${lead.reviews})</span></td>
+                    <td class="p-4">${lead.website ? `<a href="${lead.website}" target="_blank" class="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">Web Var</a>` : `<span class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-md">Web Yok ❌</span>`}</td>
+                    <td class="p-4 max-w-md">
+                        <div class="mb-2"><a href="${lead.demoLink}" target="_blank" class="text-xs text-indigo-400 underline font-semibold">🔗 Özel Demo Linkini Aç</a></div>
+                        <p class="text-xs text-slate-300 bg-slate-950/40 p-3 rounded-lg border border-slate-800/80">${lead.pitch}</p>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="copyPitch(\`${lead.pitch.replace(/"/g, '&quot;')}\`)" class="px-3 py-1.5 bg-slate-800 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700">Kopyala</button>
+                        <a href="https://wa.me/${lead.phone}?text=${encodeURIComponent(lead.pitch)}" target="_blank" class="inline-block px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow-lg">WhatsApp</a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function copyPitch(text) {
+            navigator.clipboard.writeText(text);
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = "Satış mesajı kopyalandı!";
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
+        }
+
+        fetchLeads();
+    </script>
+</body>
+</html>
