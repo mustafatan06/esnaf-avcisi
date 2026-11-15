@@ -1,22 +1,15 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Demos klasörünün var olduğundan emin olalım
-const demoDir = path.join(__dirname, 'public', 'demos');
-if (!fs.existsSync(demoDir)){
-    fs.mkdirSync(demoDir, { recursive: true });
-}
-
-// Ankara Genişletilmiş Derin Tarama Veritabanı
+// Genişletilmiş Ankara Esnaf Veritabanı
 let comprehensiveDatabase = [
   { id: 1, name: "Anadolu Torna & CNC", category: "oto", district: "Ostim", rating: 3.4, reviews: 8, website: null, phone: "905321112233" },
   { id: 2, name: "İvedik Lazer Kesim", category: "metal", district: "İvedik OSB", rating: 2.8, reviews: 4, website: null, phone: "905353334455" },
@@ -28,9 +21,45 @@ let comprehensiveDatabase = [
   { id: 8, name: "Mamak Tadilat Dekorasyon", category: "insaat", district: "Mamak", rating: 3.1, reviews: 8, website: null, phone: "905328887766" }
 ];
 
-// HTML Şablon Oluşturucu Fonksiyon
-function generateDemoHTML(firmaAdi, category, district) {
-  return `
+// Lead Listeleme ve Dinamik Demo Linki Üretici
+app.get('/api/leads', (req, res) => {
+  const { district, category, filter } = req.query;
+  let results = comprehensiveDatabase;
+
+  if (district && district !== 'all') results = results.filter(item => item.district === district);
+  if (category && category !== 'all') results = results.filter(item => item.category === category);
+
+  const processedLeads = results.map(lead => {
+    let problems = [];
+    if (!lead.website) problems.push("Google Haritalar'da web siteniz bulunmuyor.");
+    if (lead.rating < 3.8) problems.push(`Puanınız ${lead.rating} seviyesinde.`);
+
+    const isHotLead = !lead.website || lead.rating < 3.8;
+    
+    // Vercel'de kusursuz çalışan dinamik rota linki
+    const demoLink = `https://tanmedyatasarim.vercel.app/demo/${lead.id}`;
+
+    let pitch = `Merhaba ${lead.name} yetkilisi, Ankara ${lead.district} bölgesindeki işletmenizi Google'da inceledim. ${problems.join(" ")} Sizin için hazırladığımız örnek demo siteyi inceleyebilirsiniz: ${demoLink} - Beğenirseniz 24 saat içinde bu altyapıyı size özel kuralım. Tan Medya Tasarım.`;
+
+    return { ...lead, isHotLead, demoLink, problems: problems.join(" "), pitch };
+  });
+
+  let finalLeads = processedLeads;
+  if (filter === 'hot') finalLeads = processedLeads.filter(l => l.isHotLead);
+
+  res.json({ total: comprehensiveDatabase.length, filteredCount: finalLeads.length, leads: finalLeads });
+});
+
+// Dinamik Sektörel Demo Sayfası (Dosya yazmaya gerek kalmadan anlık render olur)
+app.get('/demo/:id', (req, res) => {
+  const leadId = parseInt(req.params.id);
+  const lead = comprehensiveDatabase.find(l => l.id === leadId);
+
+  const firmaAdi = lead ? lead.name : "Özel İşletme";
+  const district = lead ? lead.district : "Ankara";
+  const category = lead ? lead.category : "kurumsal";
+
+  res.send(`
     <!DOCTYPE html>
     <html lang="tr">
     <head>
@@ -73,61 +102,14 @@ function generateDemoHTML(firmaAdi, category, district) {
         </footer>
     </body>
     </html>
-  `;
+  `);
+});
+
+// Yerel test için
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Tan Medya Tasarım Motoru aktif: http://localhost:${PORT}`);
+  });
 }
 
-// Otomatik olarak her işletme için dosya oluştur ve listele
-app.get('/api/leads', (req, res) => {
-  const { district, category, filter } = req.query;
-
-  let results = comprehensiveDatabase;
-
-  if (district && district !== 'all') {
-    results = results.filter(item => item.district === district);
-  }
-  if (category && category !== 'all') {
-    results = results.filter(item => item.category === category);
-  }
-
-  const processedLeads = results.map(lead => {
-    let problems = [];
-    if (!lead.website) problems.push("Google Haritalar'da web siteniz bulunmuyor.");
-    if (lead.rating < 3.8) problems.push(`Puanınız ${lead.rating} seviyesinde.`);
-
-    const isHotLead = !lead.website || lead.rating < 3.8;
-    
-    // Her firma için benzersiz dosya adı oluştur ve kaydet
-    const fileName = `${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.html`;
-    const filePath = path.join(demoDir, fileName);
-    fs.writeFileSync(filePath, generateDemoHTML(lead.name, lead.category, lead.district));
-
-    // Canlı Vercel domain adresin (Vercel'e deploy ettiğinde otomatik çalışır)
-    // Yerelde test ederken localhost, canlıda tanmedyatasarim.vercel.app olacak
-    const demoLink = `https://tanmedyatasarim.vercel.app/demos/${fileName}`;
-
-    let pitch = `Merhaba ${lead.name} yetkilisi, Ankara ${lead.district} bölgesindeki işletmenizi Google'da inceledim. ${problems.join(" ")} Sizin için hazırladığımız örnek demo siteyi inceleyebilirsiniz: ${demoLink} - Beğenirseniz 24 saat içinde bu altyapıyı size özel kuralım. Tan Medya Tasarım.`;
-
-    return {
-      ...lead,
-      isHotLead,
-      demoLink,
-      problems: problems.join(" "),
-      pitch
-    };
-  });
-
-  let finalLeads = processedLeads;
-  if (filter === 'hot') {
-    finalLeads = processedLeads.filter(l => l.isHotLead);
-  }
-
-  res.json({
-    total: comprehensiveDatabase.length,
-    filteredCount: finalLeads.length,
-    leads: finalLeads
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Tan Medya Tasarım Otomasyon Motoru aktif: http://localhost:${PORT}`);
-});
+module.exports = app;
